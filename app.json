@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Moniepoint PMS",
+    "slug": "moniepoint-pms",
+    "scheme": "moniepointpms",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.ukemeskywalker.moniepointpms",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Show nearby Lagos filling stations and your distance to them.",
+        "NSCameraUsageDescription": "Add an optional photo to verify a station price.",
+        "NSPhotoLibraryUsageDescription": "Attach an optional pump or price board photo to your report."
+      }
+    },
+    "android": {
+      "package": "com.ukemeskywalker.moniepointpms",
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION", "CAMERA"]
+    },
+    "plugins": [
+      ["expo-location", {"locationWhenInUsePermission": "Show nearby Lagos filling stations and your distance to them."}],
+      ["expo-image-picker", {"photosPermission": "Attach an optional pump or price board photo to your report.", "cameraPermission": "Add an optional photo to verify a station price."}],
+      ["expo-build-properties", {"ios": {"deploymentTarget": "16.7"}}]
+    ]
+  }
+}
