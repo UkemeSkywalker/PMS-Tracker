@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import type { Tab } from './models';
 import { useApp } from './store';
 import { colors } from './theme';
+import { MapScreen } from './screens/MapScreen';
 
 const tabs: { name: Tab; icon: keyof typeof Ionicons.glyphMap }[] = [
   { name: 'Map', icon: 'map-outline' }, { name: 'Stations', icon: 'business-outline' },
@@ -21,7 +22,7 @@ export function RootNavigator() {
   const insets = useSafeAreaInsets();
   const title = tab === 'Map' ? 'Explore Lagos' : tab === 'Report' ? 'Report a price' : tab;
   return <View style={[styles.root, { paddingTop: insets.top }]}>
-    <Placeholder title={title} icon={tabs.find(item => item.name === tab)?.icon ?? 'map-outline'} />
+    {tab === 'Map' ? <MapScreen /> : <Placeholder title={title} icon={tabs.find(item => item.name === tab)?.icon ?? 'map-outline'} />}
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 10) }]}>
       {tabs.map(item => {
         const active = tab === item.name;

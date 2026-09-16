@@ -1,12 +1,15 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { Availability, QueueStatus, Station, Tab } from './models';
+import type { Availability, Coordinate, QueueStatus, Station, Tab } from './models';
+import { demoLocation } from './models';
 import { initialStations } from './stations';
 
 type AppState = {
   stations: Station[]; saved: string[]; contributions: number; fuelPoints: number;
   tab: Tab; selectedId: string; detailsOpen: boolean; notificationsEnabled: boolean;
+  location: Coordinate; usingDeviceLocation: boolean;
   setTab: (tab: Tab) => void; select: (id: string) => void; setDetailsOpen: (open: boolean) => void;
+  setLocation: (location: Coordinate) => void; setUsingDeviceLocation: (enabled: boolean) => void;
   toggleSaved: (id: string) => void; setNotificationsEnabled: (enabled: boolean) => void;
   submit: (id: string, price: number, availability: Availability, queueStatus: QueueStatus) => void;
 };
@@ -22,6 +25,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [selectedId, setSelectedId] = useState('nnpc-ikoyi');
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [location, setLocation] = useState<Coordinate>(demoLocation);
+  const [usingDeviceLocation, setUsingDeviceLocation] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -41,8 +46,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [stations, saved, contributions, fuelPoints, notificationsEnabled, hydrated]);
 
   const value = useMemo<AppState>(() => ({
-    stations, saved, contributions, fuelPoints, tab, selectedId, detailsOpen, notificationsEnabled,
-    setTab, select: setSelectedId, setDetailsOpen, setNotificationsEnabled,
+    stations, saved, contributions, fuelPoints, tab, selectedId, detailsOpen, notificationsEnabled, location, usingDeviceLocation,
+    setTab, select: setSelectedId, setDetailsOpen, setNotificationsEnabled, setLocation, setUsingDeviceLocation,
     toggleSaved: id => setSaved(previous => previous.includes(id) ? previous.filter(item => item !== id) : [...previous, id]),
     submit: (id, price, availability, queueStatus) => {
       setStations(previous => previous.map(item => item.id === id ? { ...item, pmsPrice: price, availability, queueStatus, lastUpdated: new Date().toISOString(), reportCount: item.reportCount + 1, verified: true, trend: [...item.trend.slice(1), price] } : item));
@@ -50,7 +55,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setFuelPoints(previous => previous + 25);
       setSelectedId(id);
     },
-  }), [stations, saved, contributions, fuelPoints, tab, selectedId, detailsOpen, notificationsEnabled]);
+  }), [stations, saved, contributions, fuelPoints, tab, selectedId, detailsOpen, notificationsEnabled, location, usingDeviceLocation]);
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 
