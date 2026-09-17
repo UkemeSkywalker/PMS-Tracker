@@ -33,7 +33,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     AsyncStorage.getItem(storageKey).then(raw => {
       if (raw) {
         const parsed = JSON.parse(raw) as Partial<Pick<AppState, 'stations' | 'saved' | 'contributions' | 'fuelPoints' | 'notificationsEnabled'>>;
-        if (parsed.stations) setStations(initialStations.map(seed => parsed.stations?.find(item => item.id === seed.id) ?? seed));
+        if (parsed.stations) setStations(initialStations.map(seed => {
+          const stored = parsed.stations?.find(item => item.id === seed.id);
+          // Refresh untouched demo rates from earlier builds while keeping user-submitted reports.
+          if (stored && stored.pmsPrice < 1000 && stored.reportCount <= seed.reportCount) return seed;
+          return stored ?? seed;
+        }));
         if (parsed.saved) setSaved(parsed.saved);
         if (typeof parsed.contributions === 'number') setContributions(parsed.contributions);
         if (typeof parsed.fuelPoints === 'number') setFuelPoints(parsed.fuelPoints);

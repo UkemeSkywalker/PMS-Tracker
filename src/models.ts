@@ -38,6 +38,10 @@ export const stationImages = {
 
 export const demoLocation: Coordinate = { latitude: 6.4441, longitude: 3.4329 };
 
+export function formatPrice(value: number): string {
+  return Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
 export function distanceKm(from: Coordinate, to: Coordinate): number {
   const rad = Math.PI / 180;
   const dLat = (to.latitude - from.latitude) * rad;

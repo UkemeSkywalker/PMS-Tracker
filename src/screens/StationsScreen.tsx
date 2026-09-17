@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { FlatList, Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { Station } from '../models';
-import { distanceKm, queueLabel, relativeTime, stationImages } from '../models';
+import { distanceKm, formatPrice, queueLabel, relativeTime, stationImages } from '../models';
 import { openDirections } from '../directions';
 import { useApp } from '../store';
 import { colors, shadow } from '../theme';
@@ -26,7 +26,7 @@ export function StationsScreen() {
 
   function showDetails(station: Station) { select(station.id); setDetailsOpen(true); }
   function report(station: Station) { select(station.id); setTab('Report'); }
-  function share(station: Station) { Share.share({ message: `${station.name}, ${station.address}: PMS ₦${station.pmsPrice}/L. Demo price from Moniepoint PMS Tracker.` }); }
+  function share(station: Station) { Share.share({ message: `${station.name}, ${station.address}: PMS ₦${formatPrice(station.pmsPrice)}/L. Demo price from Moniepoint PMS Tracker.` }); }
 
   return <View style={styles.screen}>
     <View style={styles.header}><Image source={require('../../mobile-assets/logo.png')} style={styles.logo} resizeMode="contain" /><View style={styles.headerTitles}><Text style={styles.title}>Stations</Text><Text style={styles.subtitle}>Lagos price comparison</Text></View><Image source={require('../../mobile-assets/profile.png')} style={styles.avatar} /></View>
@@ -34,7 +34,7 @@ export function StationsScreen() {
       ListHeaderComponent={<>
         <View style={styles.zoneHead}><View><Text style={styles.zoneTitle}>{zone}</Text><Text style={styles.zoneSub}>{visible.length} stations reporting demo updates</Text></View><View style={styles.live}><View style={styles.liveDot} /><Text style={styles.liveText}>Demo</Text></View></View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.zoneRow}>{zones.map(item => <Pressable key={item} onPress={() => setZone(item)} style={[styles.zoneChip, zone === item && styles.zoneChipActive]}><Text style={[styles.zoneChipText, zone === item && styles.zoneChipTextActive]}>{item}</Text></Pressable>)}</ScrollView>
-        <View style={styles.averageCard}><View style={styles.averageIcon}><Ionicons name="stats-chart" size={21} color={colors.blue} /></View><View style={{ flex: 1 }}><Text style={styles.averageCaption}>TODAY’S LAGOS DEMO AVERAGE</Text><Text style={styles.averagePrice}>₦{average}<Text style={styles.averageUnit}> /L</Text></Text></View><View style={styles.below}><Ionicons name="trending-down" size={17} color="#9B7B00" /><Text style={styles.belowText}>{below} below avg</Text></View></View>
+        <View style={styles.averageCard}><View style={styles.averageIcon}><Ionicons name="stats-chart" size={21} color={colors.blue} /></View><View style={{ flex: 1 }}><Text style={styles.averageCaption}>TODAY’S LAGOS DEMO AVERAGE</Text><Text style={styles.averagePrice}>₦{formatPrice(average)}<Text style={styles.averageUnit}> /L</Text></Text></View><View style={styles.below}><Ionicons name="trending-down" size={17} color="#9B7B00" /><Text style={styles.belowText}>{below} below avg</Text></View></View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sortRow}>{sorts.map(item => <Pressable key={item} onPress={() => setSort(item)} style={[styles.sortChip, sort === item && styles.sortActive]}><Text style={[styles.sortText, sort === item && styles.sortTextActive]}>{item}</Text></Pressable>)}</ScrollView>
       </>}
       renderItem={({ item }) => <StationCard station={item} average={average} distance={distanceKm(location, item)} saved={saved.includes(item.id)} onOpen={() => showDetails(item)} onSave={() => toggleSaved(item.id)} onShare={() => share(item)} onReport={() => report(item)} />}
@@ -47,7 +47,7 @@ function StationCard({ station, average, distance, saved, onOpen, onSave, onShar
   return <View style={styles.card}>
     <Pressable onPress={onOpen} accessibilityLabel={`Details for ${station.name}`}>
       <View style={styles.imageBox}><Image source={stationImages[station.image]} style={styles.stationImage} /><View style={styles.imageBadge}><Text style={styles.imageBadgeText}>{station.area}</Text></View><View style={styles.distanceBadge}><Ionicons name="navigate" size={12} color={colors.blue} /><Text style={styles.distanceText}>{distance.toFixed(1)} km</Text></View></View>
-      <View style={styles.cardContent}><View style={styles.cardTop}><View style={styles.cardNameCol}><Text numberOfLines={1} style={styles.stationName}>{station.name} {station.verified && <Text style={{ color: colors.blue }}>✓</Text>}</Text><Text numberOfLines={1} style={styles.address}>{station.address}</Text></View><View style={styles.priceCol}><Text style={styles.price}>₦{station.pmsPrice}<Text style={styles.litre}>/L</Text></Text><Text style={[styles.delta, delta > 0 && styles.deltaHigh]}>{delta === 0 ? 'At average' : `₦${Math.abs(delta)} ${delta < 0 ? 'below' : 'above'} avg`}</Text></View></View>
+      <View style={styles.cardContent}><View style={styles.cardTop}><View style={styles.cardNameCol}><Text numberOfLines={1} style={styles.stationName}>{station.name} {station.verified && <Text style={{ color: colors.blue }}>✓</Text>}</Text><Text numberOfLines={1} style={styles.address}>{station.address}</Text></View><View style={styles.priceCol}><Text style={styles.price}>₦{formatPrice(station.pmsPrice)}<Text style={styles.litre}>/L</Text></Text><Text style={[styles.delta, delta > 0 && styles.deltaHigh]}>{delta === 0 ? 'At average' : `₦${formatPrice(Math.abs(delta))} ${delta < 0 ? 'below' : 'above'} avg`}</Text></View></View>
         <View style={styles.badges}><Badge text={station.availability === 'selling' ? 'Selling now' : station.availability === 'restocking' ? 'Restocking' : 'Out of fuel'} icon="water-outline" color={station.availability === 'selling' ? colors.green : colors.red} /><Badge text={queueLabel(station.queueStatus)} icon="time-outline" color={station.queueStatus === 'heavy' ? colors.red : colors.blue} /><Badge text={`Verified ${relativeTime(station.lastUpdated)}`} icon="checkmark-circle-outline" color={colors.blue} />{station.posAvailable && <Badge text="POS active" icon="card-outline" color={colors.blue} />}</View>
       </View>
     </Pressable>
