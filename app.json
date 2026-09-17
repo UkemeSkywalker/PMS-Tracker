@@ -17,12 +17,35 @@
     },
     "android": {
       "package": "com.ukemeskywalker.moniepointpms",
-      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION", "CAMERA"]
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA"
+      ]
     },
     "plugins": [
-      ["expo-location", {"locationWhenInUsePermission": "Show nearby Lagos filling stations and your distance to them."}],
-      ["expo-image-picker", {"photosPermission": "Attach an optional pump or price board photo to your report.", "cameraPermission": "Add an optional photo to verify a station price."}],
-      ["expo-build-properties", {"ios": {"deploymentTarget": "16.7"}}]
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Show nearby Lagos filling stations and your distance to them."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Attach an optional pump or price board photo to your report.",
+          "cameraPermission": "Add an optional photo to verify a station price."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "16.7"
+          }
+        }
+      ],
+      "expo-status-bar"
     ]
   }
 }

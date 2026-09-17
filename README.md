@@ -4,11 +4,11 @@ A cross-platform React Native + Expo demo for finding and reporting PMS prices a
 
 ## Run on an iPhone
 
-1. Install [Expo Go](https://expo.dev/go) from the iOS App Store.
-2. Run `npm install` and `npm start` in this repository.
-3. Scan the QR code with the iPhone Camera. The phone and Mac should be on the same network. If discovery fails, use `npx expo start --tunnel`.
+1. Install [Expo Go](https://expo.dev/go) from the iOS App Store and sign in to an Expo account.
+2. Run `npm install`, `npx expo login --browser`, and `npm start` in this repository. Sign in with the same Expo account.
+3. Scan the QR code with the iPhone Camera. The phone and Mac should be on the same Wi-Fi.
 
-The project uses Expo SDK 54, which is compatible with the App Store version of Expo Go. To run an iOS Simulator window on the Mac, install Xcode and its Simulator runtime, then run `npm run ios`.
+The project uses Expo SDK 57, which supports iOS 16.4 and newer and matches the current App Store version of Expo Go. To run an iOS Simulator window on the Mac, install a compatible Xcode version and its Simulator runtime, then run `npm run ios`. For on-screen viewing without Xcode, an iPhone running iOS 18 or later can use Apple's iPhone Mirroring, or a USB-connected iPhone can be shown with QuickTime Player's movie recording device selector.
 
 ## Development
 
