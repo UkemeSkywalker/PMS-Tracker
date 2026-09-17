@@ -1,11 +1,13 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import type { Tab } from './models';
 import { useApp } from './store';
 import { colors } from './theme';
 import { MapScreen } from './screens/MapScreen';
+import { StationsScreen } from './screens/StationsScreen';
+import { StationDetailScreen } from './screens/StationDetailScreen';
 
 const tabs: { name: Tab; icon: keyof typeof Ionicons.glyphMap }[] = [
   { name: 'Map', icon: 'map-outline' }, { name: 'Stations', icon: 'business-outline' },
@@ -18,11 +20,11 @@ function Placeholder({ title, icon }: { title: string; icon: keyof typeof Ionico
 }
 
 export function RootNavigator() {
-  const { tab, setTab } = useApp();
+  const { tab, setTab, detailsOpen, setDetailsOpen, selectedId } = useApp();
   const insets = useSafeAreaInsets();
   const title = tab === 'Map' ? 'Explore Lagos' : tab === 'Report' ? 'Report a price' : tab;
   return <View style={[styles.root, { paddingTop: insets.top }]}>
-    {tab === 'Map' ? <MapScreen /> : <Placeholder title={title} icon={tabs.find(item => item.name === tab)?.icon ?? 'map-outline'} />}
+    {tab === 'Map' ? <MapScreen /> : tab === 'Stations' ? <StationsScreen /> : <Placeholder title={title} icon={tabs.find(item => item.name === tab)?.icon ?? 'map-outline'} />}
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 10) }]}>
       {tabs.map(item => {
         const active = tab === item.name;
@@ -33,6 +35,7 @@ export function RootNavigator() {
         </Pressable>;
       })}
     </View>
+    <Modal visible={detailsOpen} animationType="slide" onRequestClose={() => setDetailsOpen(false)}><StationDetailScreen stationId={selectedId} onClose={() => setDetailsOpen(false)} /></Modal>
   </View>;
 }
 
