@@ -38,6 +38,7 @@ export function MapScreen() {
   const [routeState, setRouteState] = useState<'loading' | 'ready' | 'unavailable'>('loading');
   const [locationChecked, setLocationChecked] = useState(false);
   const [recommendationOpen, setRecommendationOpen] = useState(false);
+  const [mapHeight, setMapHeight] = useState(0);
   const station = stations.find(item => item.id === selectedId) ?? stations[0];
   const average = Math.round(stations.reduce((sum, item) => sum + item.pmsPrice, 0) / stations.length);
 
@@ -119,7 +120,7 @@ export function MapScreen() {
         {item === 'Cheapest' && <View style={styles.yellowDot} />}
       </Pressable>)}
     </ScrollView>
-    <View style={styles.mapArea}>
+    <View style={styles.mapArea} onLayout={event => setMapHeight(event.nativeEvent.layout.height)}>
       <MapView ref={map} style={StyleSheet.absoluteFill} mapType={mapType} showsTraffic={traffic} showsUserLocation={usingDeviceLocation} showsCompass={false} showsMyLocationButton={false} initialRegion={{ ...demoLocation, latitudeDelta: 0.058, longitudeDelta: 0.07 }} accessibilityLabel="Interactive Lagos map with filling stations">
         {!usingDeviceLocation && <Marker coordinate={demoLocation} title="Demo starting point"><View style={styles.userMarker}><View style={styles.userMarkerInner} /></View></Marker>}
         {visible.map(item => <Marker key={`${item.id}-${item.id === selectedId}`} coordinate={item} onPress={() => choose(item, true)} tracksViewChanges={false}>
@@ -133,8 +134,9 @@ export function MapScreen() {
         <Pressable accessibilityLabel="Toggle traffic" onPress={() => setTraffic(current => !current)} style={styles.mapControl}><Ionicons name="car-outline" size={21} color={traffic ? colors.blue : colors.navy} /></Pressable>
       </View>
       {station && <View style={styles.bottomOverlay}>
-        {recommendationOpen ? <View style={styles.recommendation}>
+        {recommendationOpen ? <View style={[styles.recommendation, mapHeight > 0 && { maxHeight: Math.max(1, mapHeight - 68) }]}>
           <View style={styles.sheetBar}><View style={styles.sheetSpacer} /><Pressable onPress={() => setRecommendationOpen(false)} accessibilityLabel="Collapse station recommendation" style={styles.sheetHandleButton}><View style={styles.handle} /></Pressable><Pressable onPress={() => setRecommendationOpen(false)} accessibilityLabel="Close station recommendation" style={styles.sheetClose}><Ionicons name="close" size={21} color={colors.navy} /></Pressable></View>
+          <ScrollView style={styles.recommendationScroll} showsVerticalScrollIndicator={false} bounces={false}>
           <View style={styles.cardHeader}><Text style={styles.eyebrow}>TOP RECOMMENDATION  ★</Text><Text style={styles.demoBadge}>DEMO DATA</Text></View>
           <Image source={stationImages[station.image]} style={styles.cardImage} resizeMode="cover" accessibilityLabel={`${station.name} filling station photo`} />
           <View style={styles.cardTitleRow}><View style={styles.cardTitleCol}><Text numberOfLines={1} style={styles.stationName}>{station.name}</Text><Text numberOfLines={1} style={styles.stationAddress}>{station.address}</Text></View><View style={styles.priceBlock}><Text style={styles.bigPrice}>₦{formatPrice(station.pmsPrice)}</Text><Text style={styles.perLitre}>/L</Text></View></View>
@@ -145,6 +147,7 @@ export function MapScreen() {
           <View style={styles.metaRow}><Text style={styles.metaText}>⌖ {route ? route.distanceKm.toFixed(1) : distanceKm(location, station).toFixed(1)} km {route ? `· ${route.minutes} min drive` : routeState === 'loading' ? '· route loading' : '· route unavailable'}</Text><Text style={styles.metaText}>{relativeTime(station.lastUpdated)} · {station.reportCount} reports</Text></View>
           <View style={styles.metaRow}><Text style={styles.metaText}>✓ Moniepoint POS {station.posAvailable ? 'available' : 'unavailable'}</Text><Text style={styles.metaText}>{station.pmsPrice < average ? `₦${formatPrice(average - station.pmsPrice)} below avg` : 'View details'}</Text></View>
           <View style={styles.actions}><Pressable onPress={() => setDetailsOpen(true)} style={styles.detailsButton}><Text style={styles.detailsLabel}>Details</Text></Pressable><Pressable onPress={() => openDirections(station)} style={styles.directionsButton}><Ionicons name="navigate" size={17} color={colors.white} /><Text style={styles.directionsLabel}>Start Directions</Text></Pressable></View>
+          </ScrollView>
         </View> : <Pressable onPress={() => setRecommendationOpen(true)} accessibilityLabel={`Open recommended station ${station.name}, ₦${formatPrice(station.pmsPrice)} per litre`} style={styles.recommendationTrigger}><View style={styles.triggerIcon}><Ionicons name="star" size={19} color={colors.white} /></View><View style={styles.triggerCopy}><Text style={styles.triggerEyebrow}>TOP PICK · TAP TO OPEN</Text><Text numberOfLines={1} style={styles.triggerName}>{station.name}</Text></View><Text style={styles.triggerPrice}>₦{formatPrice(station.pmsPrice)}</Text><Ionicons name="chevron-up" size={17} color={colors.blue} /></Pressable>}
         <View style={styles.averageBanner}><Ionicons name="information-circle-outline" size={18} color={colors.blue} /><Text numberOfLines={1} style={styles.averageText}>Lagos demo average: ₦{formatPrice(average)}/L · {locationChecked && !usingDeviceLocation ? 'Using VI starting point' : 'Explore nearby prices'}</Text></View>
       </View>}
@@ -169,7 +172,7 @@ const styles = StyleSheet.create({
   marker: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: colors.white, borderRadius: 21, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 9, paddingVertical: 7, maxWidth: 160, ...shadow },
   markerSelected: { backgroundColor: colors.blue, borderColor: colors.white, borderWidth: 2, paddingHorizontal: 13, paddingVertical: 9 }, markerName: { fontSize: 10, color: colors.navy, maxWidth: 72, fontWeight: '600' }, markerPrice: { fontSize: 12, color: colors.navy, fontWeight: '800' }, markerSelectedText: { color: colors.white },
   userMarker: { width: 26, height: 26, borderRadius: 13, backgroundColor: colors.white, borderColor: colors.blue, borderWidth: 2, alignItems: 'center', justifyContent: 'center' }, userMarkerInner: { width: 11, height: 11, borderRadius: 6, backgroundColor: colors.blue },
-  bottomOverlay: { position: 'absolute', left: 12, right: 12, bottom: 12, gap: 8 }, recommendation: { backgroundColor: colors.white, borderRadius: 22, padding: 15, paddingTop: 2, ...shadow }, sheetBar: { height: 42, flexDirection: 'row', alignItems: 'center' }, sheetSpacer: { width: 44 }, sheetHandleButton: { flex: 1, height: 42, alignItems: 'center', justifyContent: 'center' }, sheetClose: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }, handle: { width: 44, height: 4, borderRadius: 2, backgroundColor: '#D9DDEA' },
+  bottomOverlay: { position: 'absolute', left: 12, right: 12, bottom: 12, gap: 8 }, recommendation: { backgroundColor: colors.white, borderRadius: 22, padding: 15, paddingTop: 2, ...shadow }, recommendationScroll: { flexShrink: 1 }, sheetBar: { height: 42, flexDirection: 'row', alignItems: 'center' }, sheetSpacer: { width: 44 }, sheetHandleButton: { flex: 1, height: 42, alignItems: 'center', justifyContent: 'center' }, sheetClose: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }, handle: { width: 44, height: 4, borderRadius: 2, backgroundColor: '#D9DDEA' },
   recommendationTrigger: { alignSelf: 'flex-start', maxWidth: '100%', height: 58, paddingHorizontal: 10, borderRadius: 29, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border, ...shadow }, triggerIcon: { width: 37, height: 37, borderRadius: 19, backgroundColor: colors.blue, alignItems: 'center', justifyContent: 'center' }, triggerCopy: { width: 142 }, triggerEyebrow: { color: colors.blue, fontSize: 9, fontWeight: '800', letterSpacing: 0.3 }, triggerName: { color: colors.navy, fontSize: 12, fontWeight: '800', marginTop: 2 }, triggerPrice: { color: colors.navy, fontSize: 17, fontWeight: '900' },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }, eyebrow: { color: colors.blue, fontSize: 10, fontWeight: '800', letterSpacing: 0.6 }, demoBadge: { color: colors.slate, fontSize: 9, fontWeight: '800' },
   cardImage: { width: '100%', height: 94, borderRadius: 14, marginTop: 10 },
