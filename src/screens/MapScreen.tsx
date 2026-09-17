@@ -4,7 +4,7 @@ import MapView, { Marker, Polyline } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import type { Coordinate, Station } from '../models';
-import { demoLocation, distanceKm, queueLabel, relativeTime } from '../models';
+import { demoLocation, distanceKm, queueLabel, relativeTime, stationImages } from '../models';
 import { fetchDrivingRoute, openDirections, type DrivingRoute } from '../directions';
 import { useApp } from '../store';
 import { colors, radius, shadow } from '../theme';
@@ -137,6 +137,7 @@ export function MapScreen() {
         {recommendationOpen ? <View style={styles.recommendation}>
           <View style={styles.sheetBar}><View style={styles.sheetSpacer} /><Pressable onPress={() => setRecommendationOpen(false)} accessibilityLabel="Collapse station recommendation" style={styles.sheetHandleButton}><View style={styles.handle} /></Pressable><Pressable onPress={() => setRecommendationOpen(false)} accessibilityLabel="Close station recommendation" style={styles.sheetClose}><Ionicons name="close" size={21} color={colors.navy} /></Pressable></View>
           <View style={styles.cardHeader}><Text style={styles.eyebrow}>TOP RECOMMENDATION  ★</Text><Text style={styles.demoBadge}>DEMO DATA</Text></View>
+          <Image source={stationImages[station.image]} style={styles.cardImage} resizeMode="cover" accessibilityLabel={`${station.name} filling station photo`} />
           <View style={styles.cardTitleRow}><View style={styles.cardTitleCol}><Text numberOfLines={1} style={styles.stationName}>{station.name}</Text><Text numberOfLines={1} style={styles.stationAddress}>{station.address}</Text></View><View style={styles.priceBlock}><Text style={styles.bigPrice}>₦{station.pmsPrice}</Text><Text style={styles.perLitre}>/L</Text></View></View>
           <View style={styles.statusRow}>
             <Text style={styles.statusText}><Text style={{ color: colors.green }}>●</Text> {station.availability === 'selling' ? 'Selling now' : station.availability === 'restocking' ? 'Restocking' : 'Out of fuel'}</Text>
@@ -172,6 +173,7 @@ const styles = StyleSheet.create({
   bottomOverlay: { position: 'absolute', left: 12, right: 12, bottom: 12, gap: 8 }, recommendation: { backgroundColor: colors.white, borderRadius: 22, padding: 15, paddingTop: 2, ...shadow }, sheetBar: { height: 42, flexDirection: 'row', alignItems: 'center' }, sheetSpacer: { width: 44 }, sheetHandleButton: { flex: 1, height: 42, alignItems: 'center', justifyContent: 'center' }, sheetClose: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }, handle: { width: 44, height: 4, borderRadius: 2, backgroundColor: '#D9DDEA' },
   recommendationTrigger: { alignSelf: 'flex-start', maxWidth: '100%', height: 58, paddingHorizontal: 10, borderRadius: 29, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.white, borderWidth: 1, borderColor: colors.border, ...shadow }, triggerIcon: { width: 37, height: 37, borderRadius: 19, backgroundColor: colors.blue, alignItems: 'center', justifyContent: 'center' }, triggerCopy: { width: 142 }, triggerEyebrow: { color: colors.blue, fontSize: 9, fontWeight: '800', letterSpacing: 0.3 }, triggerName: { color: colors.navy, fontSize: 12, fontWeight: '800', marginTop: 2 }, triggerPrice: { color: colors.navy, fontSize: 17, fontWeight: '900' },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }, eyebrow: { color: colors.blue, fontSize: 10, fontWeight: '800', letterSpacing: 0.6 }, demoBadge: { color: colors.slate, fontSize: 9, fontWeight: '800' },
+  cardImage: { width: '100%', height: 94, borderRadius: 14, marginTop: 10 },
   cardTitleRow: { flexDirection: 'row', alignItems: 'center', marginTop: 7, gap: 8 }, cardTitleCol: { flex: 1 }, stationName: { color: colors.navy, fontSize: 18, fontWeight: '800' }, stationAddress: { color: colors.slate, fontSize: 11, marginTop: 3 },
   priceBlock: { flexDirection: 'row', alignItems: 'baseline' }, bigPrice: { color: colors.navy, fontSize: 29, fontWeight: '900' }, perLitre: { color: colors.slate, fontSize: 12, fontWeight: '600' },
   statusRow: { flexDirection: 'row', gap: 10, marginTop: 12, flexWrap: 'wrap' }, statusText: { color: colors.navy, fontSize: 11, fontWeight: '700' }, metaRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8, marginTop: 7 }, metaText: { color: colors.slate, fontSize: 10, flexShrink: 1 },
