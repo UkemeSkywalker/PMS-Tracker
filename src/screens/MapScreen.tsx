@@ -98,7 +98,6 @@ export function MapScreen() {
   return <View style={styles.screen}>
     <View style={styles.header}>
       <Image source={require('../../mobile-assets/logo.png')} style={styles.logo} resizeMode="contain" />
-      <View style={styles.headerLocation}><Text style={styles.headerTitle}>Map</Text><Text style={styles.headerSub}>⌖  Lagos Island / VI</Text></View>
       <View style={styles.avatar}><Image source={require('../../mobile-assets/profile.png')} style={styles.avatarImage} /></View>
     </View>
     <View style={styles.searchWrap}>
@@ -155,8 +154,8 @@ export function MapScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  header: { height: 64, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', backgroundColor: colors.white, gap: 10 },
-  logo: { width: 122, height: 36 }, headerLocation: { flex: 1 }, headerTitle: { color: colors.navy, fontSize: 20, fontWeight: '800' }, headerSub: { color: colors.slate, fontSize: 11, fontWeight: '600' },
+  header: { height: 64, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: colors.white },
+  logo: { width: 145, height: 40 },
   avatar: { width: 35, height: 35, borderRadius: 18, overflow: 'hidden', backgroundColor: colors.paleBlue }, avatarImage: { width: '100%', height: '100%' },
   searchWrap: { zIndex: 9, paddingHorizontal: 16, paddingTop: 12, backgroundColor: colors.background },
   searchBox: { height: 52, borderRadius: radius.button, backgroundColor: colors.white, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, gap: 10, borderWidth: 1, borderColor: colors.border, ...shadow },
