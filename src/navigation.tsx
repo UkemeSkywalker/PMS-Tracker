@@ -9,6 +9,8 @@ import { MapScreen } from './screens/MapScreen';
 import { StationsScreen } from './screens/StationsScreen';
 import { StationDetailScreen } from './screens/StationDetailScreen';
 import { ReportScreen } from './screens/ReportScreen';
+import { SavedScreen } from './screens/SavedScreen';
+import { ProfileScreen } from './screens/ProfileScreen';
 
 const tabs: { name: Tab; icon: keyof typeof Ionicons.glyphMap }[] = [
   { name: 'Map', icon: 'map-outline' }, { name: 'Stations', icon: 'business-outline' },
@@ -16,16 +18,11 @@ const tabs: { name: Tab; icon: keyof typeof Ionicons.glyphMap }[] = [
   { name: 'Profile', icon: 'person-outline' },
 ];
 
-function Placeholder({ title, icon }: { title: string; icon: keyof typeof Ionicons.glyphMap }) {
-  return <View style={styles.placeholder}><Ionicons name={icon} size={52} color={colors.blue} /><Text style={styles.placeholderTitle}>{title}</Text></View>;
-}
-
 export function RootNavigator() {
   const { tab, setTab, detailsOpen, setDetailsOpen, selectedId } = useApp();
   const insets = useSafeAreaInsets();
-  const title = tab === 'Map' ? 'Explore Lagos' : tab === 'Report' ? 'Report a price' : tab;
   return <View style={[styles.root, { paddingTop: insets.top }]}>
-    {tab === 'Map' ? <MapScreen /> : tab === 'Stations' ? <StationsScreen /> : tab === 'Report' ? <ReportScreen /> : <Placeholder title={title} icon={tabs.find(item => item.name === tab)?.icon ?? 'map-outline'} />}
+    {tab === 'Map' ? <MapScreen /> : tab === 'Stations' ? <StationsScreen /> : tab === 'Report' ? <ReportScreen /> : tab === 'Saved' ? <SavedScreen /> : <ProfileScreen />}
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 10) }]}>
       {tabs.map(item => {
         const active = tab === item.name;
@@ -42,8 +39,6 @@ export function RootNavigator() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
-  placeholder: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 },
-  placeholderTitle: { fontSize: 27, fontWeight: '700', color: colors.navy },
   bar: { flexDirection: 'row', backgroundColor: colors.white, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 5, paddingHorizontal: 5 },
   tab: { flex: 1, alignItems: 'center', minHeight: 65, justifyContent: 'center' },
   iconWrap: { width: 48, height: 45, alignItems: 'center', justifyContent: 'center' },
