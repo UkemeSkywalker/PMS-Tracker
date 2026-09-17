@@ -26,6 +26,7 @@ export type Station = {
   activePumps: number;
   rating: number;
   trend: number[];
+  verificationPhotoUri?: string;
 };
 
 export const stationImages = {

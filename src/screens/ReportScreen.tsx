@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, FlatList, Image, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
+import { Directory, File, Paths } from 'expo-file-system';
 import { Ionicons } from '@expo/vector-icons';
 import type { Availability, QueueStatus } from '../models';
 import { relativeTime } from '../models';
@@ -31,15 +32,36 @@ export function ReportScreen() {
   const [chooserOpen, setChooserOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [success, setSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   useEffect(() => { if (station) { setPrice(String(station.pmsPrice)); setAvailability(station.availability); setQueue(station.queueStatus); setPhoto(null); } }, [station?.id]);
   const numericPrice = Number(price);
   const valid = Number.isInteger(numericPrice) && numericPrice >= 1 && numericPrice <= 2000;
 
   function changePrice(delta: number) { setPrice(String(Math.max(1, Math.min(2000, (valid ? numericPrice : station?.pmsPrice ?? 695) + delta)))); }
-  function doSubmit() {
+  async function doSubmit() {
     if (!station || !valid) { Alert.alert('Check the price', 'Enter a whole naira amount between ₦1 and ₦2,000.'); return; }
-    submit(station.id, numericPrice, availability, queue);
-    setSuccess(true);
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      let savedPhotoUri: string | undefined;
+      const photoDirectory = new Directory(Paths.document, 'report-photos');
+      if (photo) {
+        photoDirectory.create({ intermediates: true, idempotent: true });
+        const source = new File(photo);
+        const destination = new File(photoDirectory, `${station.id}-${Date.now()}${source.extension || '.jpg'}`);
+        await source.copy(destination);
+        savedPhotoUri = destination.uri;
+      }
+      submit(station.id, numericPrice, availability, queue, savedPhotoUri);
+      if (station.verificationPhotoUri?.startsWith(photoDirectory.uri) && station.verificationPhotoUri !== savedPhotoUri) {
+        try { new File(station.verificationPhotoUri).delete(); } catch { /* Keep the new report if old photo cleanup fails. */ }
+      }
+      setSuccess(true);
+    } catch {
+      Alert.alert('Photo could not be saved', 'Choose another photo or remove this one before submitting the report.');
+    } finally {
+      setSubmitting(false);
+    }
   }
   async function choosePhoto(source: 'camera' | 'library') {
     try {
@@ -69,10 +91,10 @@ export function ReportScreen() {
       </View>
       <View style={styles.card}><View style={styles.sectionHeader}><Text style={styles.sectionTitle}>Fuel Availability</Text><Text style={styles.required}>Required</Text></View><View style={styles.optionRow}>{availabilityOptions.map(item => <Pressable key={item.value} onPress={() => setAvailability(item.value)} style={[styles.option, availability === item.value && styles.optionActive]}><Ionicons name={item.icon} size={22} color={availability === item.value ? colors.white : colors.blue} /><Text style={[styles.optionTitle, availability === item.value && styles.optionTextActive]}>{item.title}</Text><Text style={[styles.optionSub, availability === item.value && styles.optionTextActive]}>{item.subtitle}</Text></Pressable>)}</View></View>
       <View style={styles.card}><View style={styles.sectionHeader}><Text style={styles.sectionTitle}>Current Queue</Text><Text style={styles.required}>Lagos forecourt</Text></View><View style={styles.optionRow}>{queueOptions.map(item => <Pressable key={item.value} onPress={() => setQueue(item.value)} style={[styles.option, queue === item.value && styles.queueActive]}><View style={[styles.queueDot, { backgroundColor: item.color }]} /><Text style={styles.optionTitle}>{item.title}</Text><Text style={styles.optionSub}>{item.subtitle}</Text></Pressable>)}</View></View>
-      <View style={styles.card}><View style={styles.sectionHeader}><Text style={styles.sectionTitle}>Verification Photo</Text><Text style={styles.required}>Optional</Text></View><Text style={styles.photoIntro}>Pump meter, price board, or POS slip</Text><Pressable onPress={() => Alert.alert('Add a photo', 'Choose a source', [{ text: 'Camera', onPress: () => choosePhoto('camera') }, { text: 'Photo Library', onPress: () => choosePhoto('library') }, { text: 'Cancel', style: 'cancel' }])} style={styles.photoBox}>{photo ? <><Image source={{ uri: photo }} style={styles.photoPreview} /><Text style={styles.photoAttached}>Photo attached · Tap to change</Text></> : <><View style={styles.cameraCircle}><Ionicons name="camera-outline" size={24} color={colors.blue} /></View><Text style={styles.photoTitle}>Add verification photo</Text><Text style={styles.photoSub}>Take a photo or choose from library</Text></>}</Pressable><Text style={styles.photoNote}>Photo stays on this device in the demo.</Text></View>
+      <View style={styles.card}><View style={styles.sectionHeader}><Text style={styles.sectionTitle}>Verification Photo</Text><Text style={styles.required}>Optional</Text></View><Text style={styles.photoIntro}>Pump meter, price board, or POS slip</Text><Pressable onPress={() => Alert.alert('Add a photo', 'Choose a source', [{ text: 'Camera', onPress: () => choosePhoto('camera') }, { text: 'Photo Library', onPress: () => choosePhoto('library') }, ...(photo ? [{ text: 'Remove photo', onPress: () => setPhoto(null) }] : []), { text: 'Cancel', style: 'cancel' }])} style={styles.photoBox}>{photo ? <><Image source={{ uri: photo }} style={styles.photoPreview} /><Text style={styles.photoAttached}>Photo attached · Tap to change</Text></> : <><View style={styles.cameraCircle}><Ionicons name="camera-outline" size={24} color={colors.blue} /></View><Text style={styles.photoTitle}>Add verification photo</Text><Text style={styles.photoSub}>Take a photo or choose from library</Text></>}</Pressable><Text style={styles.photoNote}>Attached photos are kept on this device with the demo report.</Text></View>
       <View style={styles.reward}><View style={styles.rewardIcon}><Ionicons name="star-outline" size={23} color={colors.white} /></View><View style={{ flex: 1 }}><Text style={styles.rewardTitle}>+25 Fuel Points</Text><Text style={styles.rewardSub}>Demo reward · Current balance {fuelPoints}</Text></View></View>
     </ScrollView>
-    <View style={styles.footer}><Pressable onPress={doSubmit} style={[styles.submit, !valid && styles.submitDisabled]}><Ionicons name="paper-plane-outline" size={18} color={colors.white} /><Text style={styles.submitText}>Submit Verified Price · ₦{valid ? numericPrice : '—'}</Text></Pressable><Text style={styles.disclaimer}>Demo report stored locally on this device.</Text></View>
+    <View style={styles.footer}><Pressable onPress={doSubmit} disabled={submitting || !valid} style={[styles.submit, (!valid || submitting) && styles.submitDisabled]}><Ionicons name="paper-plane-outline" size={18} color={colors.white} /><Text style={styles.submitText}>{submitting ? 'Saving report…' : `Submit Verified Price · ₦${valid ? numericPrice : '—'}`}</Text></Pressable><Text style={styles.disclaimer}>Demo report stored locally on this device.</Text></View>
     <Modal visible={chooserOpen} animationType="slide" onRequestClose={() => setChooserOpen(false)}><View style={[styles.chooser, { paddingTop: insets.top, paddingBottom: insets.bottom }]}><View style={styles.chooserHeader}><Text style={styles.chooserTitle}>Choose a station</Text><Pressable onPress={() => setChooserOpen(false)} style={styles.close}><Ionicons name="close" size={23} color={colors.navy} /></Pressable></View><TextInput placeholder="Search stations or areas" value={search} onChangeText={setSearch} style={styles.chooserSearch} /><FlatList data={stations.filter(item => `${item.name} ${item.area}`.toLowerCase().includes(search.toLowerCase()))} keyExtractor={item => item.id} renderItem={({ item }) => <Pressable onPress={() => { select(item.id); setChooserOpen(false); setSearch(''); }} style={styles.chooserItem}><Ionicons name="business-outline" size={21} color={colors.blue} /><View style={{ flex: 1 }}><Text style={styles.chooserName}>{item.name}</Text><Text style={styles.chooserArea}>{item.area}</Text></View><Text style={styles.chooserPrice}>₦{item.pmsPrice}</Text></Pressable>} /></View></Modal>
     <Modal visible={success} transparent animationType="fade" onRequestClose={() => setSuccess(false)}><View style={styles.successBackdrop}><View style={styles.successCard}><View style={styles.successIcon}><Ionicons name="checkmark" size={34} color={colors.white} /></View><Text style={styles.successTitle}>Price update saved</Text><Text style={styles.successText}>{station.name} is now listed at ₦{valid ? numericPrice : station.pmsPrice}/L in this demo.</Text><Text style={styles.successPoints}>+25 Fuel Points earned</Text><Pressable onPress={() => { setSuccess(false); setTab('Map'); setDetailsOpen(true); }} style={styles.successButton}><Text style={styles.successButtonText}>View station</Text></Pressable><Pressable onPress={() => { setSuccess(false); setTab('Map'); }} style={styles.doneButton}><Text style={styles.doneText}>Done</Text></Pressable></View></View></Modal>
   </KeyboardAvoidingView>;

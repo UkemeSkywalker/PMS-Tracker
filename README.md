@@ -12,6 +12,6 @@ The project uses Expo SDK 57, which supports iOS 16.4 and newer and matches the 
 
 ## Development
 
-Run `npm run typecheck` to check TypeScript. Station prices, availability, queue conditions, reports, and rewards are demo data. Reports and saved stations persist on the device. Map tiles come from Apple Maps on iOS and Google Maps on Android through `react-native-maps`; the generated station images are used for cards and details. Location permission is optional, with a Victoria Island fallback.
+Run `npm run typecheck` to check TypeScript. Station prices, availability, queue conditions, reports, and rewards are demo data. Reports, attached verification photos, and saved stations persist on the device. Map tiles come from Apple Maps on iOS and Google Maps on Android through `react-native-maps`; the generated station images are used for cards and details. Location permission is optional, with a Victoria Island fallback.
 
 The `Assets/` directory contains the original screens, HTML references, imagery, and design notes. Product screens use those references without treating the supplied illustrated Lagos map as a live map.
