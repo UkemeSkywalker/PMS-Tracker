@@ -50,6 +50,12 @@
         }
       ],
       "expo-status-bar"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f71801f6-ac89-4b26-84d1-ed9aa87780da"
+      }
+    },
+    "owner": "ukemzyskywalker"
   }
 }
