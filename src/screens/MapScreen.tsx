@@ -99,7 +99,7 @@ export function MapScreen() {
   return <View style={styles.screen}>
     <View style={styles.header}>
       <Image source={require('../../mobile-assets/logo.png')} style={styles.logo} resizeMode="contain" />
-      <View style={styles.avatar}><Image source={require('../../mobile-assets/profile.png')} style={styles.avatarImage} /></View>
+      <View style={styles.avatar}><Image source={require('../../mobile-assets/profile.webp')} style={styles.avatarImage} /></View>
     </View>
     <View style={styles.searchWrap}>
       <View style={styles.searchBox}>

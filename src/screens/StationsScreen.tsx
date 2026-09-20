@@ -29,7 +29,7 @@ export function StationsScreen() {
   function share(station: Station) { Share.share({ message: `${station.name}, ${station.address}: PMS ₦${formatPrice(station.pmsPrice)}/L. Demo price from Moniepoint PMS Tracker.` }); }
 
   return <View style={styles.screen}>
-    <View style={styles.header}><Image source={require('../../mobile-assets/logo.png')} style={styles.logo} resizeMode="contain" /><View style={styles.headerTitles}><Text style={styles.title}>Stations</Text><Text style={styles.subtitle}>Lagos price comparison</Text></View><Image source={require('../../mobile-assets/profile.png')} style={styles.avatar} /></View>
+    <View style={styles.header}><Image source={require('../../mobile-assets/logo.png')} style={styles.logo} resizeMode="contain" /><View style={styles.headerTitles}><Text style={styles.title}>Stations</Text><Text style={styles.subtitle}>Lagos price comparison</Text></View><Image source={require('../../mobile-assets/profile.webp')} style={styles.avatar} /></View>
     <FlatList data={visible} keyExtractor={item => item.id} contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}
       ListHeaderComponent={<>
         <View style={styles.zoneHead}><View><Text style={styles.zoneTitle}>{zone}</Text><Text style={styles.zoneSub}>{visible.length} stations reporting demo updates</Text></View><View style={styles.live}><View style={styles.liveDot} /><Text style={styles.liveText}>Demo</Text></View></View>

@@ -30,10 +30,10 @@ export type Station = {
 };
 
 export const stationImages = {
-  nnpc: require('../mobile-assets/station-nnpc.png'),
-  mobil: require('../mobile-assets/station-mobil.png'),
-  total: require('../mobile-assets/station-total.png'),
-  oando: require('../mobile-assets/station-oando.png'),
+  nnpc: require('../mobile-assets/station-nnpc.webp'),
+  mobil: require('../mobile-assets/station-mobil.webp'),
+  total: require('../mobile-assets/station-total.webp'),
+  oando: require('../mobile-assets/station-oando.webp'),
 };
 
 export const demoLocation: Coordinate = { latitude: 6.4441, longitude: 3.4329 };
