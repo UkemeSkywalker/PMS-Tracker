@@ -6,6 +6,10 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "web": {
+      "output": "single",
+      "name": "Moniepoint PMS Demo"
+    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.ukemeskywalker.moniepointpms",

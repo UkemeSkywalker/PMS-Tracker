@@ -15,3 +15,7 @@ The project uses Expo SDK 57, which supports iOS 16.4 and newer and matches the 
 Run `npm run typecheck` to check TypeScript. Seeded PMS prices are illustrative rates from ₦1,250 to ₦1,390 per litre, with a Lagos demo average calculated from the stations; they are not a live national price feed. Availability, queue conditions, reports, and rewards are demo data. Reports, attached verification photos, and saved stations persist on the device. The iOS map uses native Apple Maps; Android uses MapLibre with OpenFreeMap tiles in an Expo Go compatible WebView, so no Google Maps API key is needed. The generated station images are used for cards and details. Location permission is optional, with a Victoria Island fallback.
 
 The `Assets/` directory contains the original screens, HTML references, imagery, and design notes. Product screens use those references without treating the supplied illustrated Lagos map as a live map.
+
+## Browser presentation
+
+Run `npm run web` for local development or `npm run build:web` to create the browser presentation in `dist/`. The web build keeps the application in a mobile-sized frame on larger screens and uses the supplied Lagos map artwork with interactive station markers. It is intended as a zero-install product demonstration; the native builds continue to use their platform map implementations.

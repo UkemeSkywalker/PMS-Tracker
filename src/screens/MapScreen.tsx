@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import MapView, { Marker, Polyline } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import type { Coordinate, Station } from '../models';
@@ -8,7 +7,7 @@ import { demoLocation, distanceKm, formatPrice, queueLabel, relativeTime, statio
 import { fetchDrivingRoute, openDirections, type DrivingRoute } from '../directions';
 import { useApp } from '../store';
 import { colors, radius, shadow } from '../theme';
-import { AndroidMap, type AndroidMapHandle } from '../components/AndroidMap';
+import { MapSurface, type MapSurfaceHandle } from '../components/MapSurface';
 
 type Filter = 'All' | 'Cheapest' | 'Verified Today' | 'Nearest' | 'Low Queue';
 const filters: Filter[] = ['Cheapest', 'Verified Today', 'Nearest', 'Low Queue'];
@@ -30,8 +29,7 @@ const landmarks: { name: string; coordinate: Coordinate }[] = [
 
 export function MapScreen() {
   const { stations, selectedId, select, setDetailsOpen, location, setLocation, usingDeviceLocation, setUsingDeviceLocation } = useApp();
-  const map = useRef<MapView>(null);
-  const androidMap = useRef<AndroidMapHandle>(null);
+  const map = useRef<MapSurfaceHandle>(null);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<Filter>('All');
   const [mapType, setMapType] = useState<'standard' | 'satellite'>('standard');
@@ -82,8 +80,7 @@ export function MapScreen() {
   }, [stations, search, filter, location]);
 
   function focus(coordinate: Coordinate, latitudeDelta = 0.024) {
-    if (Platform.OS === 'android') androidMap.current?.focus(coordinate, Math.max(10, Math.min(16, Math.log2(360 / latitudeDelta) - 1.5)));
-    else map.current?.animateToRegion({ ...coordinate, latitudeDelta, longitudeDelta: latitudeDelta * 1.2 }, 420);
+    map.current?.focus(coordinate, latitudeDelta);
   }
   function choose(item: Station, openPreview = false) {
     select(item.id);
@@ -124,13 +121,7 @@ export function MapScreen() {
       </Pressable>)}
     </ScrollView>
     <View style={styles.mapArea} onLayout={event => setMapHeight(event.nativeEvent.layout.height)}>
-      {Platform.OS === 'android' ? <AndroidMap ref={androidMap} stations={visible} selectedId={selectedId} location={location} route={route?.coordinates} styleName={mapType === 'standard' ? 'liberty' : 'positron'} onSelect={id => { const item = stations.find(candidate => candidate.id === id); if (item) choose(item, true); }} /> : <MapView ref={map} style={StyleSheet.absoluteFill} mapType={mapType} showsTraffic={traffic} showsUserLocation={usingDeviceLocation} showsCompass={false} showsMyLocationButton={false} initialRegion={{ ...demoLocation, latitudeDelta: 0.058, longitudeDelta: 0.07 }} accessibilityLabel="Interactive Lagos map with filling stations">
-        {!usingDeviceLocation && <Marker coordinate={demoLocation} title="Demo starting point"><View style={styles.userMarker}><View style={styles.userMarkerInner} /></View></Marker>}
-        {visible.map(item => <Marker key={`${item.id}-${item.id === selectedId}`} coordinate={item} onPress={() => choose(item, true)} tracksViewChanges={false}>
-          <View style={[styles.marker, item.id === selectedId && styles.markerSelected]}><Text numberOfLines={1} style={[styles.markerName, item.id === selectedId && styles.markerSelectedText]}>{item.brand}</Text><Text style={[styles.markerPrice, item.id === selectedId && styles.markerSelectedText]}>₦{formatPrice(item.pmsPrice)}</Text></View>
-        </Marker>)}
-        {route && <Polyline coordinates={route.coordinates} strokeColor={colors.blue} strokeWidth={5} />}
-      </MapView>}
+      <MapSurface ref={map} stations={visible} selectedId={selectedId} location={location} route={route?.coordinates} mapType={mapType} traffic={traffic} usingDeviceLocation={usingDeviceLocation} onSelect={(id: string) => { const item = stations.find(candidate => candidate.id === id); if (item) choose(item, true); }} />
       <View style={styles.mapControls}>
         <Pressable accessibilityLabel="Recenter map" onPress={() => focus(location, 0.035)} style={styles.mapControl}><Ionicons name="locate" size={23} color={colors.blue} /></Pressable>
         <Pressable accessibilityLabel={Platform.OS === 'android' ? 'Switch map style' : 'Toggle satellite map'} onPress={() => setMapType(current => current === 'standard' ? 'satellite' : 'standard')} style={styles.mapControl}><Ionicons name="layers-outline" size={22} color={colors.navy} /></Pressable>

@@ -1,14 +1,13 @@
 import React from 'react';
 import { Image, Platform, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import MapView, { Marker } from 'react-native-maps';
 import Svg, { Polyline as SvgPolyline } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { distanceKm, formatPrice, queueLabel, queueWait, relativeTime, stationImages } from '../models';
 import { openDirections } from '../directions';
 import { useApp } from '../store';
 import { colors, shadow } from '../theme';
-import { AndroidMap } from '../components/AndroidMap';
+import { MapSurface } from '../components/MapSurface';
 
 export function StationDetailScreen({ stationId, onClose }: { stationId: string; onClose: () => void }) {
   const insets = useSafeAreaInsets();
@@ -35,7 +34,7 @@ export function StationDetailScreen({ stationId, onClose }: { stationId: string;
       <Text style={styles.sectionTitle}>Forecourt Conditions</Text><View style={styles.conditions}><Condition icon="speedometer-outline" title={queueLabel(station.queueStatus)} detail={`${station.activePumps} active pumps · ${queueWait(station.queueStatus)} wait`} badge="Crowd updated" /><Condition icon="card-outline" title="Moniepoint POS" detail={station.posAvailable ? 'Available for card and transfer' : 'Reported unavailable'} badge={station.posAvailable ? 'Active' : 'Offline'} /><Condition icon="checkmark-done-outline" title="Pump status" detail="Confirm dispensing at the forecourt" badge="Demo" last /></View>
       <Text style={styles.sectionTitle}>PMS 7-Day Price Trend</Text><View style={styles.chartCard}><View style={styles.chartHeader}><Text style={styles.chartDescription}>{station.trend[0] === station.pmsPrice ? 'Stable this week' : `From ₦${formatPrice(station.trend[0] ?? station.pmsPrice)} to ₦${formatPrice(station.pmsPrice)}`}</Text><Text style={styles.chartBadge}>7 days</Text></View><Svg width="100%" height={65} viewBox="0 0 300 65"><SvgPolyline points={points} fill="none" stroke={colors.blue} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></Svg><View style={styles.chartAxis}><Text style={styles.chartAxisText}>6 days ago</Text><Text style={styles.chartAxisText}>Today · ₦{formatPrice(station.pmsPrice)}</Text></View></View>
       <Text style={styles.sectionTitle}>Available Amenities</Text><View style={styles.amenities}>{station.amenities.map(item => <View key={item} style={styles.amenity}><Ionicons name={amenityIcon(item)} size={20} color={colors.blue} /><Text style={styles.amenityText}>{item}</Text></View>)}</View>
-      <Text style={styles.sectionTitle}>Location</Text><View style={styles.miniMap}>{Platform.OS === 'android' ? <AndroidMap stations={[station]} selectedId={station.id} center={station} compact /> : <MapView style={StyleSheet.absoluteFill} initialRegion={{ latitude: station.latitude, longitude: station.longitude, latitudeDelta: 0.015, longitudeDelta: 0.015 }} scrollEnabled={false} zoomEnabled={false} rotateEnabled={false} pitchEnabled={false}><Marker coordinate={station} title={station.name} /></MapView>}<View style={styles.mapCaption}><Text style={styles.mapCaptionText}>{station.area} · Lagos</Text><Pressable onPress={() => { onClose(); setTab('Map'); }} style={styles.viewMap}><Text style={styles.viewMapText}>View Map</Text></Pressable></View></View>
+      <Text style={styles.sectionTitle}>Location</Text><View style={styles.miniMap}><MapSurface stations={[station]} selectedId={station.id} center={station} compact /><View style={styles.mapCaption}><Text style={styles.mapCaptionText}>{station.area} · Lagos</Text><Pressable onPress={() => { onClose(); setTab('Map'); }} style={styles.viewMap}><Text style={styles.viewMapText}>View Map</Text></Pressable></View></View>
     </ScrollView>
     <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 12) }]}><Pressable onPress={() => openDirections(station)} style={styles.primary}><Ionicons name="navigate" size={18} color={colors.white} /><Text style={styles.primaryText}>Get Directions · {distance.toFixed(1)} km</Text></Pressable><Pressable onPress={report} style={styles.secondary}><Text style={styles.secondaryText}>Confirm or Report Pump Price</Text><Text style={styles.points}>+25 pts</Text></Pressable></View>
   </View>;
